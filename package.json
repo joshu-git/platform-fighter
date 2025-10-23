@@ -1,0 +1,28 @@
+{
+  "name": "platform-fighter",
+  "version": "1.0.0",
+  "scripts": {
+    "db:generate": "drizzle-kit generate",
+    "db:migrate": "netlify dev:exec drizzle-kit migrate",
+    "db:studio": "netlify dev:exec drizzle-kit studio"
+  },
+  "devDependencies": {
+    "@types/bcryptjs": "^2.4.6",
+    "@types/jsonwebtoken": "^9.0.10",
+    "@types/node": "^24.9.1",
+    "@types/nodemailer": "^7.0.2",
+    "dotenv": "^17.2.3",
+    "drizzle-kit": "^0.31.5"
+  },
+  "dependencies": {
+    "@netlify/functions": "^5.0.1",
+    "@netlify/neon": "^0.1.0",
+    "bcrypt": "^6.0.0",
+    "bcryptjs": "^3.0.2",
+    "colyseus.js": "^0.16.22",
+    "drizzle-orm": "^0.44.6",
+    "jsonwebtoken": "^9.0.2",
+    "nodemailer": "^7.0.10",
+    "pg": "^8.16.3"
+  }
+}

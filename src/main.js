@@ -1,3 +1,4 @@
+import './style.css';
 import Phaser from "phaser";
 
 // Import all scenes
@@ -8,12 +9,14 @@ import { CharacterSelectScene } from "./scenes/CharacterSelectScene.js";
 import { GameScene } from "./scenes/GameScene.js";
 import { LogoutScene } from "./scenes/LogoutScene.js";
 
-// Phaser game config
+// Get the container element
+const container = document.getElementById("game-container");
+
 const config = {
   type: Phaser.AUTO,
-  parent: "game-container",
-  width: window.innerWidth,
-  height: window.innerHeight,
+  parent: container, // can pass element directly
+  width: container.clientWidth,
+  height: container.clientHeight,
   scale: {
     mode: Phaser.Scale.RESIZE,
     autoCenter: Phaser.Scale.CENTER_BOTH,
@@ -21,6 +24,9 @@ const config = {
   physics: {
     default: "arcade",
     arcade: { gravity: { y: 1000 }, debug: false },
+  },
+  dom: {
+    createContainer: true,
   },
   scene: [
     LoginScene,
@@ -32,10 +38,9 @@ const config = {
   ],
 };
 
-// Create the game instance
 const game = new Phaser.Game(config);
 
-// Handle browser resize
+// Update size on window resize
 window.addEventListener("resize", () => {
-  game.scale.resize(window.innerWidth, window.innerHeight);
+  game.scale.resize(container.clientWidth, container.clientHeight);
 });

@@ -1,24 +1,41 @@
-import './style.css'
-import javascriptLogo from './javascript.svg'
-import viteLogo from '/vite.svg'
-import { setupCounter } from './counter.js'
+import Phaser from "phaser";
 
-document.querySelector('#app').innerHTML = `
-  <div>
-    <a href="https://vite.dev" target="_blank">
-      <img src="${viteLogo}" class="logo" alt="Vite logo" />
-    </a>
-    <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript" target="_blank">
-      <img src="${javascriptLogo}" class="logo vanilla" alt="JavaScript logo" />
-    </a>
-    <h1>Hello Vite!</h1>
-    <div class="card">
-      <button id="counter" type="button"></button>
-    </div>
-    <p class="read-the-docs">
-      Click on the Vite logo to learn more
-    </p>
-  </div>
-`
+// Import all scenes
+import { LoginScene } from "./scenes/LoginScene.js";
+import { RegisterScene } from "./scenes/RegisterScene.js";
+import { ModeSelectScene } from "./scenes/ModeSelectScene.js";
+import { CharacterSelectScene } from "./scenes/CharacterSelectScene.js";
+import { GameScene } from "./scenes/GameScene.js";
+import { LogoutScene } from "./scenes/LogoutScene.js";
 
-setupCounter(document.querySelector('#counter'))
+// Phaser game config
+const config = {
+  type: Phaser.AUTO,
+  parent: "game-container",
+  width: window.innerWidth,
+  height: window.innerHeight,
+  scale: {
+    mode: Phaser.Scale.RESIZE,
+    autoCenter: Phaser.Scale.CENTER_BOTH,
+  },
+  physics: {
+    default: "arcade",
+    arcade: { gravity: { y: 1000 }, debug: false },
+  },
+  scene: [
+    LoginScene,
+    RegisterScene,
+    ModeSelectScene,
+    CharacterSelectScene,
+    GameScene,
+    LogoutScene,
+  ],
+};
+
+// Create the game instance
+const game = new Phaser.Game(config);
+
+// Handle browser resize
+window.addEventListener("resize", () => {
+  game.scale.resize(window.innerWidth, window.innerHeight);
+});

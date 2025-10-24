@@ -1,5 +1,4 @@
 import './style.css';
-import Phaser from "phaser";
 
 // Import all scenes
 import { LoginScene } from "./scenes/LoginScene.js";

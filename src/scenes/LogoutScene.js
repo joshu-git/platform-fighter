@@ -1,5 +1,3 @@
-import Phaser from "phaser";
-
 export class LogoutScene extends Phaser.Scene {
   constructor() {
     super({ key: "LogoutScene" });

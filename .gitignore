@@ -1,39 +1,24 @@
-# Node modules
-node_modules/
-
 # Logs
 logs
 *.log
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
 
-# Environment variables
-.env
-.env.local
-.env.*.local
+node_modules
+dist
+dist-ssr
+*.local
 
-# Netlify CLI local files
-.netlify/
-.netlify/state.json
-
-# Build output
-dist/
-build/
-.drizzle/      # migration output folder
-
-# TypeScript
-*.tsbuildinfo
-
-# OS-specific files
+# Editor directories and files
+.vscode/*
+!.vscode/extensions.json
+.idea
 .DS_Store
-Thumbs.db
-
-# Editor folders
-.vscode/
-.vscodium/
-.idea/
-
-# Optional lock files if using alternative package managers
-pnpm-lock.yaml
-yarn.lock
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?

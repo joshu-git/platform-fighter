@@ -1,0 +1,21 @@
+{
+	"siteId": "ccbbae9f-e326-476d-9cb6-9c2f37baac31",
+	"geolocation": {
+		"data": {
+			"city": "Hounslow",
+			"country": {
+				"code": "GB",
+				"name": "United Kingdom"
+			},
+			"subdivision": {
+				"code": "ENG",
+				"name": "England"
+			},
+			"timezone": "Europe/London",
+			"latitude": 51.4674,
+			"longitude": -0.3556,
+			"postalCode": "TW3"
+		},
+		"timestamp": 1761221806156
+	}
+}

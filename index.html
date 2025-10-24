@@ -1,17 +1,20 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Platform Fighter</title>
-    
-    <!-- Phaser library -->
-    <script src="//cdn.jsdelivr.net/npm/phaser@3.55.2/dist/phaser.min.js" defer></script>
-    
-    <!-- Your scripts -->
-    <script src="game.js" defer></script>
+  <meta charset="UTF-8" />
+  <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Platform Fighter</title>
+
+  <!-- Phaser library -->
+  <script src="//cdn.jsdelivr.net/npm/phaser@3.55.2/dist/phaser.min.js" defer></script>
 </head>
 <body>
-    <!-- All scripts are deferred, so nothing else is needed here -->
+  <!-- Game container -->
+  <div id="game-container"></div>
+
+  <!-- Vite entry point -->
+  <script type="module" src="/src/main.js"></script>
 </body>
 </html>
+

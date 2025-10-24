@@ -1,29 +1,26 @@
-import { defineConfig } from 'vite';
-import path from 'path';
+import { defineConfig } from "vite";
+import { resolve } from "path";
 
+// https://vitejs.dev/config/
 export default defineConfig({
-  root: 'src', // your main JS code is in src/
-  base: './',  // ensures relative paths work correctly
+  root: ".", // project root
+  base: "./", // ensures relative paths work
   build: {
-    outDir: '../dist', // compiled files go here
-    emptyOutDir: true,
+    outDir: "dist", // build output
     rollupOptions: {
-      input: path.resolve(__dirname, 'src/main.js'), // entry point
-      output: {
-        // Keep file names clean
-        entryFileNames: '[name].js',
-        assetFileNames: '[name].[ext]',
-        chunkFileNames: '[name].js',
+      input: {
+        main: resolve(__dirname, "index.html"),
       },
     },
   },
   resolve: {
     alias: {
-      '@': path.resolve(__dirname, 'src'), // so you can import from '@/data/characters.js'
+      // Shortcut for assets or data
+      "@": resolve(__dirname, "src"),
     },
   },
   server: {
-    port: 3000,
+    port: 5173,
     open: true,
   },
 });

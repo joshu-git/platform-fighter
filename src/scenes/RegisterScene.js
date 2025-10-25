@@ -1,93 +1,75 @@
+import { api } from "../api.js";
+
 export class RegisterScene extends Phaser.Scene {
   constructor() {
     super({ key: "RegisterScene" });
   }
 
   create() {
-    this.add
-      .text(window.innerWidth / 2, 100, "Register", {
-        fontSize: "32px",
-        color: "#fff",
-      })
-      .setOrigin(0.5);
+    this.cameras.main.fadeIn(500, 0, 0, 0);
 
-    // Input fields
-    const usernameInput = this.add.dom(window.innerWidth / 2, 200, "input", {
-      type: "text",
-      placeholder: "Username",
-      fontSize: "24px",
+    // Title
+    this.add.text(this.scale.width / 2, 100, "Register", {
+      fontSize: "36px",
+      color: "#fff",
+    }).setOrigin(0.5);
+
+    // DOM container
+    const domContainer = document.createElement("div");
+    domContainer.classList.add("dom-ui");
+    domContainer.innerHTML = `
+      <input id="username" type="text" name="username" placeholder="Username" autocomplete="username" />
+      <input id="email" type="email" name="email" placeholder="Email" autocomplete="email" />
+      <input id="password" type="password" name="password" placeholder="Password" autocomplete="new-password" />
+      <button id="register-btn">Register</button>
+      <button id="back-btn">Back to Login</button>
+      <p id="status" style="color:#fff; font-size:1rem; margin-top:8px;"></p>
+    `;
+    document.getElementById("game-container").appendChild(domContainer);
+
+    const usernameInput = domContainer.querySelector("#username");
+    const emailInput = domContainer.querySelector("#email");
+    const passwordInput = domContainer.querySelector("#password");
+    const registerBtn = domContainer.querySelector("#register-btn");
+    const backBtn = domContainer.querySelector("#back-btn");
+    const status = domContainer.querySelector("#status");
+
+    // Enter key support
+    domContainer.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") registerBtn.click();
     });
 
-    const emailInput = this.add.dom(window.innerWidth / 2, 260, "input", {
-      type: "email",
-      placeholder: "Email",
-      fontSize: "24px",
-    });
-
-    const passwordInput = this.add.dom(window.innerWidth / 2, 320, "input", {
-      type: "password",
-      placeholder: "Password",
-      fontSize: "24px",
-    });
-
-    const status = this.add
-      .text(window.innerWidth / 2, 460, "", {
-        fontSize: "20px",
-        color: "#fff",
-        wordWrap: { width: 500 },
-        align: "center",
-      })
-      .setOrigin(0.5);
-
-    // Buttons
-    const registerBtn = this.add
-      .text(window.innerWidth / 2, 390, "Register", {
-        fontSize: "28px",
-        color: "#00ff00",
-      })
-      .setOrigin(0.5)
-      .setInteractive();
-
-    const backBtn = this.add
-      .text(window.innerWidth / 2, 440, "Back to Login", {
-        fontSize: "22px",
-        color: "#00aaff",
-      })
-      .setOrigin(0.5)
-      .setInteractive();
-
-    // Handle register button click
-    registerBtn.on("pointerdown", async () => {
-      const username = usernameInput.node.value.trim();
-      const email = emailInput.node.value.trim();
-      const password = passwordInput.node.value.trim();
+    registerBtn.addEventListener("click", async () => {
+      const username = usernameInput.value.trim();
+      const email = emailInput.value.trim();
+      const password = passwordInput.value.trim();
 
       if (!username || !email || !password) {
-        status.text = "Please fill in all fields.";
+        status.textContent = "Please fill in all fields.";
         return;
       }
 
-      status.text = "Registering...";
+      status.textContent = "Registering...";
 
       try {
-        const res = await fetch("/.netlify/functions/register", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ username, email, password }),
-        });
-
-        const data = await res.json();
-        if (!res.ok) throw new Error(data.error || "Registration failed");
-
-        status.text = "Registration successful! Check your email to verify your account.";
+        await api.register(username, email, password);
+        status.textContent = "Registration successful! Check your email to verify your account.";
       } catch (err) {
-        status.text = err.message;
+        status.textContent = err.message;
       }
     });
 
-    // Back to Login
-    backBtn.on("pointerdown", () => {
-      this.scene.start("LoginScene");
+    backBtn.addEventListener("click", () => {
+      this.fadeOutTo("LoginScene", domContainer);
+    });
+  }
+
+  fadeOutTo(sceneKey, domContainer) {
+    domContainer.classList.add("fade-out");
+    this.cameras.main.fadeOut(500, 0, 0, 0);
+    this.time.delayedCall(500, () => {
+      domContainer.remove();
+      this.scene.start(sceneKey);
     });
   }
 }

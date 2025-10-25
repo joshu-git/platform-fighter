@@ -1,88 +1,89 @@
+import { api } from "../api.js";
+
 export class LoginScene extends Phaser.Scene {
   constructor() {
     super({ key: "LoginScene" });
   }
 
   create() {
-    this.add
-      .text(window.innerWidth / 2, 100, "Login", {
-        fontSize: "32px",
-        color: "#fff",
-      })
-      .setOrigin(0.5);
+    this.cameras.main.fadeIn(500, 0, 0, 0);
 
-    const usernameInput = this.add.dom(window.innerWidth / 2, 200, "input", {
-      type: "text",
-      placeholder: "Username",
-      fontSize: "24px",
-    });
+    // Title
+    this.add.text(this.scale.width / 2, 100, "Login", {
+      fontSize: "36px",
+      color: "#fff",
+    }).setOrigin(0.5);
 
-    const passwordInput = this.add.dom(window.innerWidth / 2, 260, "input", {
-      type: "password",
-      placeholder: "Password",
-      fontSize: "24px",
-    });
+    // DOM container
+    const domContainer = document.createElement("div");
+    domContainer.classList.add("dom-ui");
+    domContainer.innerHTML = `
+      <input id="username" type="text" name="username" placeholder="Username" autocomplete="username" />
+      <input id="password" type="password" name="password" placeholder="Password" autocomplete="current-password" />
+      <button id="login-btn">Login</button>
+      <button id="register-btn">Register</button>
+      <p id="status" style="color:#fff; font-size:1rem; margin-top:8px;"></p>
+    `;
+    document.getElementById("game-container").appendChild(domContainer);
 
-    const status = this.add
-      .text(window.innerWidth / 2, 400, "", {
-        fontSize: "20px",
-        color: "#fff",
-      })
-      .setOrigin(0.5);
+    const usernameInput = domContainer.querySelector("#username");
+    const passwordInput = domContainer.querySelector("#password");
+    const loginBtn = domContainer.querySelector("#login-btn");
+    const registerBtn = domContainer.querySelector("#register-btn");
+    const status = domContainer.querySelector("#status");
 
-    // Check if user already logged in
+    // Auto-login check
     const token = localStorage.getItem("authToken");
     if (token) {
-      this.scene.start("ModeSelectScene");
+      this.fadeOutTo("ModeSelectScene", domContainer);
       return;
     }
 
-    const loginBtn = this.add
-      .text(window.innerWidth / 2, 330, "Login", {
-        fontSize: "28px",
-        color: "#00ff00",
-      })
-      .setOrigin(0.5)
-      .setInteractive();
+    // Enter key support
+    domContainer.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") loginBtn.click();
+    });
 
-    const registerBtn = this.add
-      .text(window.innerWidth / 2, 380, "Register", {
-        fontSize: "24px",
-        color: "#00aaff",
-      })
-      .setOrigin(0.5)
-      .setInteractive();
-
-    loginBtn.on("pointerdown", async () => {
-      const username = usernameInput.node.value.trim();
-      const password = passwordInput.node.value.trim();
+    // Login logic
+    loginBtn.addEventListener("click", async () => {
+      const username = usernameInput.value.trim();
+      const password = passwordInput.value.trim();
       if (!username || !password) {
-        status.text = "Please fill in all fields.";
+        status.textContent = "Please fill in all fields.";
         return;
       }
 
-      status.text = "Logging in...";
+      status.textContent = "Logging in...";
 
       try {
-        const res = await fetch("/.netlify/functions/login", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ username, password }),
-        });
-
-        const data = await res.json();
-        if (!res.ok) throw new Error(data.error || "Login failed");
-
-        localStorage.setItem("authToken", data.token);
-        localStorage.setItem("username", data.user.username);
-        this.scene.start("ModeSelectScene");
+        await api.login(username, password);
+        this.fadeOutTo("ModeSelectScene", domContainer);
       } catch (err) {
-        status.text = err.message;
+        status.textContent = err.message;
       }
     });
 
-    registerBtn.on("pointerdown", () => {
-      this.scene.start("RegisterScene");
+    // Go to register scene
+    registerBtn.addEventListener("click", () => {
+      this.fadeOutTo("RegisterScene", domContainer);
+    });
+
+    // Handle email verification automatically if token exists in URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const verifyToken = urlParams.get("token");
+    if (verifyToken) {
+      api.verify(verifyToken)
+        .then(() => this.fadeOutTo("ModeSelectScene", domContainer))
+        .catch(err => console.error(err));
+    }
+  }
+
+  fadeOutTo(sceneKey, domContainer) {
+    domContainer.classList.add("fade-out");
+    this.cameras.main.fadeOut(500, 0, 0, 0);
+    this.time.delayedCall(500, () => {
+      domContainer.remove();
+      this.scene.start(sceneKey);
     });
   }
 }

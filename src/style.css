@@ -6,12 +6,13 @@
 }
 
 /* Full viewport for html & body */
-html, body {
+html,
+body {
   width: 100%;
   height: 100%;
-  overflow: hidden; /* prevent scrollbars */
+  overflow: hidden;
   font-family: Arial, Helvetica, sans-serif;
-  background-color: #000; /* optional black background */
+  background-color: #000;
   color: #fff;
 }
 
@@ -20,40 +21,115 @@ html, body {
   width: 100vw;
   height: 100vh;
   position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* Centered UI container */
+.dom-ui {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
 }
 
 /* DOM input fields */
 input[type="text"],
-input[type="password"] {
-  padding: 8px 12px;
-  font-size: 18px;
+input[type="password"],
+input[type="email"] {
+  padding: 10px 14px;
+  font-size: 1rem;
   border: 2px solid #fff;
   border-radius: 6px;
   outline: none;
-  background-color: rgba(0, 0, 0, 0.7);
+  background-color: rgba(255, 255, 255, 0.1);
   color: #fff;
-  width: 250px;
+  width: 260px;
+  max-width: 80%;
+  text-align: center;
+  transition: all 0.2s ease;
+}
+
+input::placeholder {
+  color: #bbb;
+  opacity: 1;
   text-align: center;
 }
 
-/* DOM buttons (if you ever add them instead of text objects) */
+input:focus {
+  border-color: #00ff00;
+  background-color: rgba(255, 255, 255, 0.2);
+}
+
+/* DOM buttons (if ever used instead of Phaser text) */
 button {
   padding: 10px 20px;
-  font-size: 20px;
+  font-size: 1.1rem;
   border: none;
   border-radius: 6px;
   cursor: pointer;
   background-color: #00ff00;
   color: #000;
-  transition: background-color 0.2s ease;
+  transition: background-color 0.2s ease, transform 0.1s ease;
 }
 
 button:hover {
   background-color: #00cc00;
+  transform: scale(1.05);
 }
 
 /* Phaser text styling */
 .phaser-text {
   font-family: Arial, Helvetica, sans-serif;
   color: #fff;
+}
+
+/* ---------------------------
+   ✅ Responsive scaling
+---------------------------- */
+@media (max-width: 768px) {
+  input[type="text"],
+  input[type="password"],
+  input[type="email"] {
+    font-size: 0.95rem;
+    width: 70%;
+  }
+
+  button {
+    font-size: 1rem;
+  }
+}
+
+@media (max-width: 480px) {
+  input[type="text"],
+  input[type="password"],
+  input[type="email"] {
+    font-size: 0.9rem;
+    width: 85%;
+    padding: 8px 10px;
+  }
+
+  button {
+    font-size: 0.95rem;
+    padding: 8px 14px;
+  }
+
+  #game-container {
+    height: 100dvh; /* modern mobile-safe viewport */
+  }
+
+  .fade-out {
+  animation: fadeOutUI 0.5s ease forwards;
+}
+
+@keyframes fadeOutUI {
+  to {
+    opacity: 0;
+  }
+}
 }

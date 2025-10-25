@@ -10,26 +10,32 @@ export const handler = async (event: HandlerEvent, context: HandlerContext) => {
     const { username, password } = JSON.parse(event.body || "{}");
 
     const existing = await db.select().from(users).where(eq(users.username, username));
-    if (existing.length === 0)
+    if (!existing || existing.length === 0) {
       return { statusCode: 400, body: JSON.stringify({ error: "User not found" }) };
+    }
 
     const user = existing[0];
-    if (!user.verified)
+    if (!user.verified) {
       return { statusCode: 401, body: JSON.stringify({ error: "Email not verified" }) };
+    }
 
     const match = await bcrypt.compare(password, user.password);
-    if (!match)
+    if (!match) {
       return { statusCode: 401, body: JSON.stringify({ error: "Invalid password" }) };
+    }
 
     const token = jwt.sign(
       { id: user.id, username: user.username },
       process.env.JWT_SECRET!,
-      { expiresIn: "7d" }
+      { expiresIn: "365d" }
     );
 
     return {
       statusCode: 200,
-      body: JSON.stringify({ token, user: { username: user.username, wins: user.wins, losses: user.losses } }),
+      body: JSON.stringify({
+        token,
+        user: { username: user.username, wins: user.wins, losses: user.losses },
+      }),
     };
   } catch (err) {
     console.error(err);

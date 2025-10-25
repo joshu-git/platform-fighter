@@ -6,29 +6,36 @@ export class LogoutScene extends Phaser.Scene {
   }
 
   create() {
-    this.cameras.main.fadeIn(500, 0, 0, 0);
+    this.cameras.main.fadeIn(250, 0, 0, 0);
 
-    // Clear user data
+    // Clear user session
     api.logout();
 
-    // DOM UI
+    // UI Container
     const domContainer = document.createElement("div");
     domContainer.classList.add("dom-ui");
     domContainer.innerHTML = `
-      <p style="color:#fff; font-size:1.4rem;">You have been logged out.</p>
+      <p style="color:#FFC107; font-size:1.3rem; text-align:center;">
+        You have been logged out.
+      </p>
       <button id="back-login">Return to Login</button>
     `;
     document.getElementById("game-container").appendChild(domContainer);
 
     const backBtn = domContainer.querySelector("#back-login");
 
-    // Fade transition back to LoginScene
+    // Allow Enter key to confirm
+    domContainer.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") backBtn.click();
+    });
+
+    // Manual back button
     backBtn.addEventListener("click", () => {
       this.fadeOutTo("LoginScene", domContainer);
     });
 
-    // Auto redirect after 2 seconds
-    this.time.delayedCall(2000, () => {
+    // Auto redirect after 1.5s
+    this.time.delayedCall(1500, () => {
       if (this.scene.isActive("LogoutScene")) {
         this.fadeOutTo("LoginScene", domContainer);
       }
@@ -37,8 +44,8 @@ export class LogoutScene extends Phaser.Scene {
 
   fadeOutTo(sceneKey, domContainer) {
     domContainer.classList.add("fade-out");
-    this.cameras.main.fadeOut(500, 0, 0, 0);
-    this.time.delayedCall(500, () => {
+    this.cameras.main.fadeOut(250, 0, 0, 0);
+    this.time.delayedCall(250, () => {
       domContainer.remove();
       this.scene.start(sceneKey);
     });

@@ -1,7 +1,9 @@
 import { api } from "../utils/api.js";
 
 export class LoginScene extends Phaser.Scene {
-  constructor() { super({ key: "LoginScene" }); }
+  constructor() {
+    super({ key: "LoginScene" });
+  }
 
   create() {
     this.cameras.main.setBackgroundColor("#0b0d16");
@@ -16,7 +18,7 @@ export class LoginScene extends Phaser.Scene {
     const domContainer = document.createElement("div");
     domContainer.classList.add("dom-ui");
     domContainer.innerHTML = `
-      <input id="username" type="text" placeholder="Username" autocomplete="username" />
+      <input id="username" type="text" placeholder="Username or Email" autocomplete="username" />
       <input id="password" type="password" placeholder="Password" autocomplete="current-password" />
       <button id="login-btn">Login</button>
       <button id="register-btn">Register</button>
@@ -30,27 +32,62 @@ export class LoginScene extends Phaser.Scene {
     const registerBtn = domContainer.querySelector("#register-btn");
     const status = domContainer.querySelector("#status");
 
+    // Auto-login if token exists
     const token = localStorage.getItem("authToken");
-    if (token) return this.switchScene("ModeSelectScene", domContainer);
+    if (token) {
+      this.switchScene("ModeSelectScene", domContainer);
+      return;
+    }
 
-    domContainer.addEventListener("keydown", e => { if(e.key==="Enter") loginBtn.click(); });
+    // Enter key support
+    domContainer.addEventListener("keydown", e => {
+      if (e.key === "Enter") loginBtn.click();
+    });
 
+    // Login logic
     loginBtn.addEventListener("click", async () => {
       const user = username.value.trim();
       const pass = password.value.trim();
-      if (!user || !pass) { status.textContent="Please fill in all fields."; return; }
-      status.textContent="Logging in...";
-      try { await api.login(user, pass); this.switchScene("ModeSelectScene", domContainer); }
-      catch(err){ status.textContent=err.message; }
+
+      if (!user || !pass) {
+        status.textContent = "Please fill in all fields.";
+        return;
+      }
+
+      status.textContent = "Logging in...";
+
+      try {
+        const res = await api.login(user, pass);
+
+        // If email not verified
+        if (res.error === "Email not verified") {
+          status.textContent = "Email not verified. Check your inbox.";
+          return;
+        }
+
+        // Save token and redirect
+        localStorage.setItem("authToken", res.token);
+        this.switchScene("ModeSelectScene", domContainer);
+      } catch (err) {
+        status.textContent = err.message || "Login failed. Try again.";
+      }
     });
 
-    registerBtn.addEventListener("click", () => this.switchScene("RegisterScene", domContainer));
+    // Go to register scene
+    registerBtn.addEventListener("click", () => {
+      this.switchScene("RegisterScene", domContainer);
+    });
 
+    // Handle email verification token in URL
     const verifyToken = new URLSearchParams(window.location.search).get("token");
-    if (verifyToken) api.verify(verifyToken).then(()=> this.switchScene("ModeSelectScene", domContainer)).catch(console.error);
+    if (verifyToken) {
+      api.verify(verifyToken)
+        .then(() => this.switchScene("ModeSelectScene", domContainer))
+        .catch(console.error);
+    }
   }
 
-  switchScene(sceneKey, domContainer){
+  switchScene(sceneKey, domContainer) {
     domContainer.remove();
     this.scene.start(sceneKey);
   }

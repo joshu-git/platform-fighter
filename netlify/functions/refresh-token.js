@@ -2,9 +2,8 @@ import { db } from "../../db";
 import { users } from "../../db/schema";
 import { eq } from "drizzle-orm";
 import jwt from "jsonwebtoken";
-import type { HandlerEvent, HandlerContext } from "@netlify/functions";
 
-export const handler = async (event: HandlerEvent, context: HandlerContext) => {
+export const handler = async (event, context) => {
   try {
     const { token } = JSON.parse(event.body || "{}");
 
@@ -13,7 +12,12 @@ export const handler = async (event: HandlerEvent, context: HandlerContext) => {
     }
 
     // Verify using REFRESH secret
-    const decoded = jwt.verify(token, process.env.JWT_REFRESH_SECRET!) as { id: number };
+    let decoded;
+    try {
+      decoded = jwt.verify(token, process.env.JWT_REFRESH_SECRET);
+    } catch (err) {
+      return { statusCode: 401, body: JSON.stringify({ error: "Invalid refresh token" }) };
+    }
 
     // Find the user by ID
     const existing = await db.select().from(users).where(eq(users.id, decoded.id));
@@ -29,7 +33,7 @@ export const handler = async (event: HandlerEvent, context: HandlerContext) => {
     // Generate a fresh access token
     const newToken = jwt.sign(
       { id: user.id, username: user.username },
-      process.env.JWT_SECRET!, // Access token secret
+      process.env.JWT_SECRET, // Access token secret
       { expiresIn: "365d" } // 1 year lifespan
     );
 
@@ -37,7 +41,7 @@ export const handler = async (event: HandlerEvent, context: HandlerContext) => {
       statusCode: 200,
       body: JSON.stringify({ token: newToken }),
     };
-  } catch (err: any) {
+  } catch (err) {
     console.error("Refresh token error:", err);
     const message =
       err.name === "TokenExpiredError"

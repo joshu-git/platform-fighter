@@ -1,32 +1,44 @@
-import { db } from "../../db";
-import { users } from "../../db/schema";
-import { eq } from "drizzle-orm";
-import bcrypt from "bcryptjs";
-import jwt from "jsonwebtoken";
-import type { HandlerEvent, HandlerContext } from "@netlify/functions";
+const { db } = require("../../db");
+const { users } = require("../../db/schema");
+const { eq } = require("drizzle-orm");
+const bcrypt = require("bcryptjs");
+const jwt = require("jsonwebtoken");
 
-export const handler = async (event: HandlerEvent, context: HandlerContext) => {
+exports.handler = async function (event, context) {
   try {
-    const { username, password } = JSON.parse(event.body || "{}");
+    if (!event.body) {
+      return { statusCode: 400, body: JSON.stringify({ error: "Missing request body" }) };
+    }
 
+    const { username, password } = JSON.parse(event.body);
+
+    if (!username || !password) {
+      return { statusCode: 400, body: JSON.stringify({ error: "Username and password required" }) };
+    }
+
+    // Check if user exists
     const existing = await db.select().from(users).where(eq(users.username, username));
     if (!existing || existing.length === 0) {
       return { statusCode: 400, body: JSON.stringify({ error: "User not found" }) };
     }
 
     const user = existing[0];
+
+    // Check if email verified
     if (!user.verified) {
       return { statusCode: 401, body: JSON.stringify({ error: "Email not verified" }) };
     }
 
+    // Check password
     const match = await bcrypt.compare(password, user.password);
     if (!match) {
       return { statusCode: 401, body: JSON.stringify({ error: "Invalid password" }) };
     }
 
+    // Sign JWT
     const token = jwt.sign(
       { id: user.id, username: user.username },
-      process.env.JWT_SECRET!,
+      process.env.JWT_SECRET,
       { expiresIn: "365d" }
     );
 
@@ -38,7 +50,7 @@ export const handler = async (event: HandlerEvent, context: HandlerContext) => {
       }),
     };
   } catch (err) {
-    console.error(err);
+    console.error("Login error:", err);
     return { statusCode: 500, body: JSON.stringify({ error: "Server error" }) };
   }
 };

@@ -1,21 +1,23 @@
 import { api } from "../utils/api.js";
 
 export class RegisterScene extends Phaser.Scene {
-  constructor() { super({ key: "RegisterScene" }); }
+  constructor() {
+    super({ key: "RegisterScene" });
+  }
 
   create() {
     this.cameras.main.setBackgroundColor("#0b0d16");
 
-    this.add.text(this.scale.width/2, 100, "Register", {
-      fontSize:"36px",
-      color:"#FFD700",
-      fontFamily:"Poppins",
-      fontStyle:"bold"
+    this.add.text(this.scale.width / 2, 100, "Register", {
+      fontSize: "36px",
+      color: "#FFD700",
+      fontFamily: "Poppins",
+      fontStyle: "bold",
     }).setOrigin(0.5);
 
-    const domContainer=document.createElement("div");
+    const domContainer = document.createElement("div");
     domContainer.classList.add("dom-ui");
-    domContainer.innerHTML=`
+    domContainer.innerHTML = `
       <input id="username" type="text" placeholder="Username" />
       <input id="email" type="email" placeholder="Email" />
       <input id="password" type="password" placeholder="Password" />
@@ -25,27 +27,49 @@ export class RegisterScene extends Phaser.Scene {
     `;
     document.getElementById("game-container").appendChild(domContainer);
 
-    const username=domContainer.querySelector("#username");
-    const email=domContainer.querySelector("#email");
-    const password=domContainer.querySelector("#password");
-    const registerBtn=domContainer.querySelector("#register-btn");
-    const backBtn=domContainer.querySelector("#back-btn");
-    const status=domContainer.querySelector("#status");
+    const username = domContainer.querySelector("#username");
+    const email = domContainer.querySelector("#email");
+    const password = domContainer.querySelector("#password");
+    const registerBtn = domContainer.querySelector("#register-btn");
+    const backBtn = domContainer.querySelector("#back-btn");
+    const status = domContainer.querySelector("#status");
 
-    domContainer.addEventListener("keydown", e=>{ if(e.key==="Enter") registerBtn.click(); });
-
-    registerBtn.addEventListener("click", async ()=>{
-      const u=username.value.trim(), m=email.value.trim(), p=password.value.trim();
-      if(!u||!m||!p){status.textContent="Please fill in all fields."; return;}
-      status.textContent="Registering...";
-      try{ await api.register(u,m,p); status.textContent="Success! Check your email."; }
-      catch(err){ status.textContent=err.message; }
+    domContainer.addEventListener("keydown", e => {
+      if (e.key === "Enter") registerBtn.click();
     });
 
-    backBtn.addEventListener("click", ()=>this.switchScene("LoginScene", domContainer));
+    registerBtn.addEventListener("click", async () => {
+      const u = username.value.trim();
+      const m = email.value.trim();
+      const p = password.value.trim();
+
+      if (!u || !m || !p) {
+        status.textContent = "Please fill in all fields.";
+        return;
+      }
+
+      // Client-side password validation
+      const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/;
+      if (!passwordRegex.test(p)) {
+        status.textContent =
+          "Password must be at least 8 characters long and include at least one uppercase letter, one lowercase letter, and one number.";
+        return;
+      }
+
+      status.textContent = "Registering...";
+
+      try {
+        await api.register(u, m, p);
+        status.textContent = "Success! Check your email to verify your account.";
+      } catch (err) {
+        status.textContent = err.message;
+      }
+    });
+
+    backBtn.addEventListener("click", () => this.switchScene("LoginScene", domContainer));
   }
 
-  switchScene(sceneKey, domContainer){
+  switchScene(sceneKey, domContainer) {
     domContainer.remove();
     this.scene.start(sceneKey);
   }

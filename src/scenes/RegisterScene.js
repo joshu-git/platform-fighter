@@ -1,4 +1,4 @@
-import { api } from "../src/api.js";
+import { api } from "../utils/api.js";
 
 export class RegisterScene extends Phaser.Scene {
   constructor() {

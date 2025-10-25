@@ -1,16 +1,14 @@
 import { api } from "../utils/api.js";
 
 export class LoginScene extends Phaser.Scene {
-  constructor() {
-    super({ key: "LoginScene" });
-  }
+  constructor() { super({ key: "LoginScene" }); }
 
   create() {
-    this.cameras.main.fadeIn(250, 0, 0, 0);
+    this.cameras.main.setBackgroundColor("#0b0d16");
 
     this.add.text(this.scale.width / 2, 100, "Login", {
       fontSize: "36px",
-      color: "#FFC107",
+      color: "#FFD700",
       fontFamily: "Poppins",
       fontStyle: "bold",
     }).setOrigin(0.5);
@@ -22,7 +20,7 @@ export class LoginScene extends Phaser.Scene {
       <input id="password" type="password" placeholder="Password" autocomplete="current-password" />
       <button id="login-btn">Login</button>
       <button id="register-btn">Register</button>
-      <p id="status" style="color:#FFC107; font-size:1rem; margin-top:8px;"></p>
+      <p id="status" style="color:#FFD700; font-size:1rem; margin-top:8px;"></p>
     `;
     document.getElementById("game-container").appendChild(domContainer);
 
@@ -33,45 +31,27 @@ export class LoginScene extends Phaser.Scene {
     const status = domContainer.querySelector("#status");
 
     const token = localStorage.getItem("authToken");
-    if (token) return this.fadeOutTo("ModeSelectScene", domContainer);
+    if (token) return this.switchScene("ModeSelectScene", domContainer);
 
-    domContainer.addEventListener("keydown", e => {
-      if (e.key === "Enter") loginBtn.click();
-    });
+    domContainer.addEventListener("keydown", e => { if(e.key==="Enter") loginBtn.click(); });
 
     loginBtn.addEventListener("click", async () => {
       const user = username.value.trim();
       const pass = password.value.trim();
-      if (!user || !pass) return (status.textContent = "Please fill in all fields.");
-
-      status.textContent = "Logging in...";
-
-      try {
-        await api.login(user, pass);
-        this.fadeOutTo("ModeSelectScene", domContainer);
-      } catch (err) {
-        status.textContent = err.message;
-      }
+      if (!user || !pass) { status.textContent="Please fill in all fields."; return; }
+      status.textContent="Logging in...";
+      try { await api.login(user, pass); this.switchScene("ModeSelectScene", domContainer); }
+      catch(err){ status.textContent=err.message; }
     });
 
-    registerBtn.addEventListener("click", () => {
-      this.fadeOutTo("RegisterScene", domContainer);
-    });
+    registerBtn.addEventListener("click", () => this.switchScene("RegisterScene", domContainer));
 
     const verifyToken = new URLSearchParams(window.location.search).get("token");
-    if (verifyToken) {
-      api.verify(verifyToken)
-        .then(() => this.fadeOutTo("ModeSelectScene", domContainer))
-        .catch(err => console.error(err));
-    }
+    if (verifyToken) api.verify(verifyToken).then(()=> this.switchScene("ModeSelectScene", domContainer)).catch(console.error);
   }
 
-  fadeOutTo(sceneKey, domContainer) {
-    domContainer.classList.add("fade-out");
-    this.cameras.main.fadeOut(250, 0, 0, 0);
-    this.time.delayedCall(250, () => {
-      domContainer.remove();
-      this.scene.start(sceneKey);
-    });
+  switchScene(sceneKey, domContainer){
+    domContainer.remove();
+    this.scene.start(sceneKey);
   }
 }

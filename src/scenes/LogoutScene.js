@@ -1,4 +1,4 @@
-import { api } from "../api.js";
+import { api } from "../src/api.js";
 
 export class LogoutScene extends Phaser.Scene {
   constructor() {
